@@ -4,14 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - FTPD System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.tailwindcss.com">
+        
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js">
+    </script>
+
+
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0d1117; color: white; }
         .stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; transition: 0.3s; }
         .stat-card:hover { border-color: #2ecc71; transform: translateY(-5px); }
         .btn-week { background: #21262d; border: 1px solid #30363d; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
         .btn-week.active { background: #238636; border-color: #2ea043; }
+        .week-badge{
+    display:inline-block;
+    padding:3px 10px;
+    margin-right:6px;
+    margin-top:6px;
+
+    border-radius:999px;
+    font-weight:bold;
+
+    background:#22c55e20;
+    border:1px solid #22c55e55;
+    color:#22c55e;
+}
     </style>
 </head>
 <body class="p-4 md:p-10">
@@ -21,12 +39,17 @@
         <div class="mb-10 text-center">
             <h1 id="userName" class="text-4xl font-extrabold text-white uppercase tracking-wider">กำลังโหลดชื่อ...</h1>
             <div class="text-xl mt-3 flex justify-center items-center gap-4">
-                <span id="userRank" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-sm font-bold uppercase">กำลังโหลดยศ...</span>
-                <div class="h-4 w-[1px] bg-gray-700"></div> 
+                ยส: <span id="userRank" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-2xl font-bold uppercase">กำลังโหลดยศ...</span>
+                <div class="h-4 w-[5px] bg-gray-700"></div> 
                 <p class="text-gray-400">
-                    รวมสะสมทั้งหมด: <span id="totalLifetime" class="text-white font-mono font-bold text-2xl">0</span>
+                รวมเคส: <span id="totalLifetime" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-2xl font-bold uppercase">0</span>
                 </p>
+                <div id="unpaidBox"></div>
             </div>
+            <div id="unpaidMonths"
+class="mt-3 text-sm text-red-400 font-semibold">
+กำลังตรวจสอบเงินเดือน...
+</div>
         </div>
 
         <div class="mb-8">
@@ -60,6 +83,16 @@
             <div class="stat-card border-green-500/50 bg-green-500/5">
                 <p class="text-green-500 text-sm font-bold">รวมอาทิตย์นี้</p>
                 <h2 id="valTotal" class="text-4xl font-black text-white">-</h2>
+            </div>
+                <div class="stat-card border-yellow-500/40 bg-yellow-500/5">
+                <p class="text-yellow-400 text-sm font-bold">เงินรายอาทิตย์</p>
+                <h2 id="valMoney" class="text-4xl font-black text-white">0</h2>
+            </div>
+                <div class="stat-card border-blue-500/40 bg-blue-500/5">
+                <p class="text-blue-400 text-sm font-bold">สถานะการชำระ</p>
+                <h2 id="valPaidStatus" class="text-3xl font-black text-white">
+                ตรวจสอบ...
+                </h2>
             </div>
         </div>
     </div>
@@ -128,27 +161,129 @@
                     return cellValue.includes(searchName);
                 });
                 
-                if(userData) {
-                    document.getElementById('val1').innerText = userData[2] || "0";  
-                    document.getElementById('val2').innerText = userData[3] || "0";  
-                    document.getElementById('val3').innerText = userData[4] || "0";  
-                    document.getElementById('val4').innerText = userData[5] || "0";  
-                    document.getElementById('val5').innerText = userData[6] || "0";  
-                    document.getElementById('valTotal').innerText = userData[10] || "0"; 
-                } else {
-                    ["val1", "val2", "val3", "val4", "val5", "valTotal"].forEach(id => {
-                        document.getElementById(id).innerText = "0";
-                    });
-                }
-            },
+                if (userData) {
+
+    document.getElementById('val1').innerText = userData[2] || "0";
+    document.getElementById('val2').innerText = userData[3] || "0";
+    document.getElementById('val3').innerText = userData[4] || "0";
+    document.getElementById('val4').innerText = userData[5] || "0";
+    document.getElementById('val5').innerText = userData[6] || "0";
+    document.getElementById('valTotal').innerText = userData[10] || "0";
+
+    // ===== เงิน =====
+    const moneyRaw = userData[16]
+        ? userData[16].toString().replace(/,/g,'')
+        : "0";
+
+    const money = Number(moneyRaw);
+
+    document.getElementById('valMoney').innerText =
+        money.toLocaleString('th-TH') + " ";
+
+
+    // ===== สถานะจ่ายเงิน (Column R) =====
+    const paidCell = (userData[17] || "").toString().toLowerCase();
+    const statusEl = document.getElementById('valPaidStatus');
+
+    if (paidCell === "true") {
+        statusEl.innerText = "✅ จ่ายแล้ว";
+        statusEl.className = "text-3xl font-black text-green-400";
+    } else {
+        statusEl.innerText = "❌ ยังไม่จ่าย";
+        statusEl.className = "text-3xl font-black text-red-400";
+    }
+
+} else {
+
+    ["val1","val2","val3","val4","val5","valTotal","valMoney"]
+        .forEach(id => {
+            document.getElementById(id).innerText = "0";
+        });
+
+    document.getElementById('valPaidStatus').innerText = "-";
+}
+        },
             error: function(err) {
                 alert("เข้าถึงข้อมูลไม่ได้! ตรวจสอบการ Share 'Anyone with the link'");
             }
         });
     }
 
+    async function checkUnpaidMonths() {
+
+    Papa.parse(baseCsvUrl, {
+        download: true,
+        complete: async function(results) {
+
+            const rows = results.data;
+            const weeks = rows.slice(3)
+                .map(r => r[8])
+                .filter(Boolean);
+
+            let unpaidList = [];
+
+            for (const sheetName of weeks) {
+
+                const url =
+                `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+
+                await new Promise(resolve => {
+
+                    Papa.parse(url, {
+                        download: true,
+                        complete: function(res) {
+
+                            const userRow = res.data.find(r =>
+                                r[0] &&
+                                r[0].toLowerCase()
+                                .includes(targetName.toLowerCase())
+                            );
+
+                            if (userRow) {
+
+                                const paid =
+                                    (userRow[17] || "")
+                                    .toString()
+                                    .toLowerCase();
+
+                                // ❌ ยังไม่รับเงิน
+                                if (paid !== "true") {
+                                    unpaidList.push(sheetName);
+                                }
+                            }
+
+                            resolve();
+                        }
+                    });
+                });
+            }
+
+            const box = document.getElementById('unpaidMonths');
+
+            if (unpaidList.length === 0) {
+                box.className =
+                    "mt-3 text-1xl text-green-400 font-semibold";
+                box.innerText = "✅ รับเงินครบทุกสัปดาห์แล้ว";
+            } else {
+                box.className =
+                    "mt-3 text-2xl text-red-400 font-semibold";
+                const html = unpaidList
+                .map(w => `<span class="week-badge">${w}</span>`)
+                .join("");
+
+                box.innerHTML =
+                "⚠ ยังไม่ได้รับเงิน:<br>" + html;
+            }
+        }
+    });
+}
+
+    checkUnpaidMonths();
     initWeekSelector();
     loadGeneralInfo(); // เรียกใช้ข้อมูลหน้าหลัก
 </script>
+
+
+
 </body>
 </html>
