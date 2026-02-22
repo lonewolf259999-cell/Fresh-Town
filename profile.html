@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - FTPD System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0d1117; color: white; }
+        .stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; transition: 0.3s; }
+        .stat-card:hover { border-color: #2ecc71; transform: translateY(-5px); }
+        .btn-week { background: #21262d; border: 1px solid #30363d; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .btn-week.active { background: #238636; border-color: #2ea043; }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+    <div class="max-w-4xl mx-auto">
+        <a href="index.html" class="text-green-500 hover:underline mb-6 inline-block">← กลับหน้าหลัก</a>
+        
+        <div class="mb-10 text-center">
+            <h1 id="userName" class="text-4xl font-extrabold text-white uppercase tracking-wider">กำลังโหลดชื่อ...</h1>
+            <div class="text-xl mt-3 flex justify-center items-center gap-4">
+                <span id="userRank" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-sm font-bold uppercase">กำลังโหลดยศ...</span>
+                <div class="h-4 w-[1px] bg-gray-700"></div> 
+                <p class="text-gray-400">
+                    รวมสะสมทั้งหมด: <span id="totalLifetime" class="text-white font-mono font-bold text-2xl">0</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-sm font-bold text-gray-500 uppercase mb-3">เลือกสัปดาห์ที่ต้องการดู</h3>
+            <div id="weekSelector" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <hr class="border-gray-800 mb-8">
+
+        <div id="statsGrid" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="stat-card">
+                <p class="text-gray-500 text-sm">เทค 2</p>
+                <h2 id="val1" class="text-3xl font-bold text-green-500">-</h2>
+            </div>
+            <div class="stat-card">
+                <p class="text-gray-500 text-sm">คดีปกติ</p>
+                <h2 id="val2" class="text-3xl font-bold text-green-500">-</h2>
+            </div>
+            <div class="stat-card">
+                <p class="text-gray-500 text-sm">ทำคดี</p>
+                <h2 id="val3" class="text-3xl font-bold text-green-500">-</h2>
+            </div>
+            <div class="stat-card">
+                <p class="text-gray-500 text-sm">รถยอด</p>
+                <h2 id="val4" class="text-3xl font-bold text-green-500">-</h2>
+            </div>
+            <div class="stat-card">
+                <p class="text-gray-500 text-sm">คุมสอบ</p>
+                <h2 id="val5" class="text-3xl font-bold text-green-500">-</h2>
+            </div>
+            <div class="stat-card border-green-500/50 bg-green-500/5">
+                <p class="text-green-500 text-sm font-bold">รวมอาทิตย์นี้</p>
+                <h2 id="valTotal" class="text-4xl font-black text-white">-</h2>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const params = new URLSearchParams(window.location.search);
+    const targetName = params.get('name');
+    document.getElementById('userName').innerText = targetName || "ไม่พบชื่อ";
+
+    const spreadsheetId = "1QnXWv7QIh4QdaeNcMR6sybUMt9Sd3vzmU6Id6Fz8UiQ";
+    const baseCsvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vTufyS20gYs7kwAw7NhumKGtOjh3pIYM0eRvL7xYJnpfkfrRs1hcw5QKDeCzrLwkz78k6w0FSzAK5_S/pub?output=csv`;
+
+    async function loadGeneralInfo() {
+        Papa.parse(baseCsvUrl, {
+            download: true,
+            complete: function(results) {
+                const rows = results.data;
+                const generalData = rows.find(r => r[4] && r[4].trim() === targetName.trim());
+                if (generalData) {
+                    document.getElementById('userRank').innerText = generalData[5] || "ไม่ระบุยศ";
+                    document.getElementById('totalLifetime').innerText = generalData[6] || "0";
+                }
+            }
+        });
+    }
+
+    async function initWeekSelector() {
+        Papa.parse(baseCsvUrl, {
+            download: true,
+            complete: function(results) {
+                const rows = results.data;
+                const selector = document.getElementById('weekSelector');
+                selector.innerHTML = ""; 
+                rows.slice(3).forEach(row => {
+                    const weekName = row[8] ? row[8].trim() : null;
+                    if (weekName) {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-week bg-gray-700 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition';
+                        btn.innerText = weekName;
+                        btn.onclick = () => {
+                            document.querySelectorAll('.btn-week').forEach(b => {
+                                b.classList.remove('bg-green-600');
+                                b.classList.add('bg-gray-700');
+                            });
+                            btn.classList.remove('bg-gray-700');
+                            btn.classList.add('bg-green-600');
+                            loadDataBySheetName(weekName);
+                        };
+                        selector.appendChild(btn);
+                    }
+                });
+            }
+        });
+    }
+
+    async function loadDataBySheetName(sheetName) {
+        const dynamicUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+        Papa.parse(dynamicUrl, {
+            download: true,
+            complete: function(results) {
+                const rows = results.data;
+                const userData = rows.find(r => {
+                    if (!r[0]) return false;
+                    const cellValue = r[0].toString().toLowerCase();
+                    const searchName = targetName.toLowerCase().trim();
+                    return cellValue.includes(searchName);
+                });
+                
+                if(userData) {
+                    document.getElementById('val1').innerText = userData[2] || "0";  
+                    document.getElementById('val2').innerText = userData[3] || "0";  
+                    document.getElementById('val3').innerText = userData[4] || "0";  
+                    document.getElementById('val4').innerText = userData[5] || "0";  
+                    document.getElementById('val5').innerText = userData[6] || "0";  
+                    document.getElementById('valTotal').innerText = userData[10] || "0"; 
+                } else {
+                    ["val1", "val2", "val3", "val4", "val5", "valTotal"].forEach(id => {
+                        document.getElementById(id).innerText = "0";
+                    });
+                }
+            },
+            error: function(err) {
+                alert("เข้าถึงข้อมูลไม่ได้! ตรวจสอบการ Share 'Anyone with the link'");
+            }
+        });
+    }
+
+    initWeekSelector();
+    loadGeneralInfo(); // เรียกใช้ข้อมูลหน้าหลัก
+</script>
+</body>
+</html>
