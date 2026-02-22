@@ -1,298 +1,347 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - FTPD System</title>
-    <script src="https://cdn.tailwindcss.com">
-        
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js">
-    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile - FTPD System</title>
 
-        <div class="max-w-5xl mx-auto">
-        <div class="text-center mb-10">
-            <div class="inline-flex items-center justify-center p-3 mb-4">
-                <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                </svg>
-                <h1 class="text-3xl font-extrabold text-white ml-3 tracking-wider uppercase">Fresh Town Police</h1>
-            </div>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0d1117; color: white; }
-        .stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; transition: 0.3s; }
-        .stat-card:hover { border-color: #2ecc71; transform: translateY(-5px); }
-        .btn-week { background: #21262d; border: 1px solid #30363d; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .btn-week.active { background: #238636; border-color: #2ea043; }
-        .week-badge{
+<style>
+@media (max-width:640px){
+  .stat-card{
+    padding:14px;
+  }
+  .stat-card h2{
+    font-size:20px;
+  }
+}
+    
+body{
+    font-family:'Inter',sans-serif;
+    background:#0d1117;
+    color:white;
+}
+
+.stat-card{
+    background:#161b22;
+    border:1px solid #30363d;
+    border-radius:12px;
+    padding:20px;
+    transition:.25s;
+}
+.stat-card:hover{
+    border-color:#2ecc71;
+    transform:translateY(-4px);
+}
+
+.btn-week{
+    background:#21262d;
+    border:1px solid #30363d;
+    padding:8px 16px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.btn-week.active{
+    background:#238636;
+}
+
+.week-badge{
     display:inline-block;
     padding:3px 10px;
-    margin-right:6px;
-    margin-top:6px;
-
+    margin:4px;
     border-radius:999px;
     font-weight:bold;
-
     background:#22c55e20;
     border:1px solid #22c55e55;
     color:#22c55e;
 }
-    </style>
+
+.btn-week{ 
+    white-space:nowrap; 
+    font-size:15px; 
+    padding:6px 14px; 
+}
+</style>
 </head>
+
 <body class="p-4 md:p-10">
-    <div class="max-w-4xl mx-auto">
-        <a href="index.html" class="text-green-500 hover:underline mb-6 inline-block">← กลับหน้าหลัก</a>
-        
-        <div class="mb-10 text-center">
-            <h1 id="userName" class="text-4xl font-extrabold text-white uppercase tracking-wider">กำลังโหลดชื่อ...</h1>
-            <div class="text-xl mt-3 flex justify-center items-center gap-4">
-                ยส: <span id="userRank" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-2xl font-bold uppercase">กำลังโหลดยศ...</span>
-                <div class="h-4 w-[5px] bg-gray-700"></div> 
-                <p class="text-gray-400">
-                รวมเคส: <span id="totalLifetime" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-2xl font-bold uppercase">0</span>
-                </p>
-                <div id="unpaidBox"></div>
-            </div>
-            <div id="unpaidMonths"
-class="mt-3 text-sm text-red-400 font-semibold">
+
+<div class="max-w-4xl mx-auto">
+
+<a href="index.html" class="text-green-400 hover:underline">
+← กลับหน้าหลัก
+</a>
+
+<div class="text-center mb-10">
+<h1 id="userName"
+class="text-2xl md:text-4xl font-extrabold uppercase">
+กำลังโหลด...
+</h1>
+
+<div class="text-sm md:text-xl mt-3 flex flex-col md:block gap-2">
+ยศ :
+<span id="userRank" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-2xl font-bold uppercase">...</span>
+|
+รวมเคส :
+<span id="totalLifetime" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-2xl font-bold uppercase">0</span>
+</div>
+
+<div id="unpaidMonths"
+class="mt-3 text-red-400 font-semibold">
 กำลังตรวจสอบเงินเดือน...
 </div>
-        </div>
+</div>
 
-        <div class="mb-8">
-            <h3 class="text-sm font-bold text-gray-500 uppercase mb-3">เลือกสัปดาห์ที่ต้องการดู</h3>
-            <div id="weekSelector" class="flex flex-wrap gap-2"></div>
-        </div>
+<div id="weekSelector"
+class="flex flex-wrap gap-2 mb-6 justify-center"></div>
 
-        <hr class="border-gray-800 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 ">
 
-        <div id="statsGrid" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div class="stat-card">
-                <p class="text-gray-500 text-sm">เทค 2</p>
-                <h2 id="val1" class="text-3xl font-bold text-green-500">-</h2>
-            </div>
-            <div class="stat-card">
-                <p class="text-gray-500 text-sm">คดีปกติ</p>
-                <h2 id="val2" class="text-3xl font-bold text-green-500">-</h2>
-            </div>
-            <div class="stat-card">
-                <p class="text-gray-500 text-sm">ทำคดี</p>
-                <h2 id="val3" class="text-3xl font-bold text-green-500">-</h2>
-            </div>
-            <div class="stat-card">
-                <p class="text-gray-500 text-sm">รถยอด</p>
-                <h2 id="val4" class="text-3xl font-bold text-green-500">-</h2>
-            </div>
-            <div class="stat-card">
-                <p class="text-gray-500 text-sm">คุมสอบ</p>
-                <h2 id="val5" class="text-3xl font-bold text-green-500">-</h2>
-            </div>
-            <div class="stat-card border-green-500/50 bg-green-500/5">
-                <p class="text-green-500 text-sm font-bold">รวมอาทิตย์นี้</p>
-                <h2 id="valTotal" class="text-4xl font-black text-white">-</h2>
-            </div>
-                <div class="stat-card border-yellow-500/40 bg-yellow-500/5">
-                <p class="text-yellow-400 text-sm font-bold">เงินรายอาทิตย์</p>
-                <h2 id="valMoney" class="text-4xl font-black text-white">0</h2>
-            </div>
-                <div class="stat-card border-blue-500/40 bg-blue-500/5">
-                <p class="text-blue-400 text-sm font-bold">สถานะการชำระ</p>
-                <h2 id="valPaidStatus" class="text-3xl font-black text-white">
-                ตรวจสอบ...
-                </h2>
-            </div>
-        </div>
-    </div>
+<div class="stat-card"><p>เทค 2</p><h2 id="val1">0</h2></div>
+<div class="stat-card"><p>คดีปกติ</p><h2 id="val2">0</h2></div>
+<div class="stat-card"><p>ทำคดี</p><h2 id="val3">0</h2></div>
+<div class="stat-card"><p>รถยอด</p><h2 id="val4">0</h2></div>
+<div class="stat-card"><p>คุมสอบ</p><h2 id="val5">0</h2></div>
 
-    <script>
-    const params = new URLSearchParams(window.location.search);
-    const targetName = params.get('name');
-    document.getElementById('userName').innerText = targetName || "ไม่พบชื่อ";
+<div class="stat-card bg-green-500/5 border-green-500/40">
+<p>รวมอาทิตย์นี้</p>
+<h2 id="valTotal" class="text-3xl font-bold">0</h2>
+</div>
 
-    const spreadsheetId = "1QnXWv7QIh4QdaeNcMR6sybUMt9Sd3vzmU6Id6Fz8UiQ";
-    const baseCsvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vTufyS20gYs7kwAw7NhumKGtOjh3pIYM0eRvL7xYJnpfkfrRs1hcw5QKDeCzrLwkz78k6w0FSzAK5_S/pub?output=csv`;
+<div class="stat-card bg-yellow-500/5 border-yellow-400/40">
+<p>เงินรายอาทิตย์</p>
+<h2 id="valMoney" class="text-3xl font-bold">0</h2>
+</div>
 
-    async function loadGeneralInfo() {
-        Papa.parse(baseCsvUrl, {
-            download: true,
-            complete: function(results) {
-                const rows = results.data;
-                const generalData = rows.find(r => r[4] && r[4].trim() === targetName.trim());
-                if (generalData) {
-                    document.getElementById('userRank').innerText = generalData[5] || "ไม่ระบุยศ";
-                    document.getElementById('totalLifetime').innerText = generalData[6] || "0";
-                }
-            }
-        });
-    }
+<div class="stat-card bg-blue-500/5 border-blue-400/40">
+<p>สถานะ</p>
+<h2 id="valPaidStatus">ตรวจสอบ...</h2>
+<button id="paidBtn"
+class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-bold">
+✅ จ่ายแล้ว
+</button>
+</div>
 
-    async function initWeekSelector() {
-        Papa.parse(baseCsvUrl, {
-            download: true,
-            complete: function(results) {
-                const rows = results.data;
-                const selector = document.getElementById('weekSelector');
-                selector.innerHTML = ""; 
-                rows.slice(3).forEach(row => {
-                    const weekName = row[8] ? row[8].trim() : null;
-                    if (weekName) {
-                        const btn = document.createElement('button');
-                        btn.className = 'btn-week bg-gray-700 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition';
-                        btn.innerText = weekName;
-                        btn.onclick = () => {
-                            document.querySelectorAll('.btn-week').forEach(b => {
-                                b.classList.remove('bg-green-600');
-                                b.classList.add('bg-gray-700');
-                            });
-                            btn.classList.remove('bg-gray-700');
-                            btn.classList.add('bg-green-600');
-                            loadDataBySheetName(weekName);
-                        };
-                        selector.appendChild(btn);
-                    }
-                });
-            }
-        });
-    }
+</div>
+</div>
 
-    async function loadDataBySheetName(sheetName) {
-        const dynamicUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-        Papa.parse(dynamicUrl, {
-            download: true,
-            complete: function(results) {
-                const rows = results.data;
-                const userData = rows.find(r => {
-                    if (!r[0]) return false;
-                    const cellValue = r[0].toString().toLowerCase();
-                    const searchName = targetName.toLowerCase().trim();
-                    return cellValue.includes(searchName);
-                });
-                
-                if (userData) {
+<script>
+const params = new URLSearchParams(location.search);
+const targetName = (params.get("name")||"").trim();
 
-    document.getElementById('val1').innerText = userData[2] || "0";
-    document.getElementById('val2').innerText = userData[3] || "0";
-    document.getElementById('val3').innerText = userData[4] || "0";
-    document.getElementById('val4').innerText = userData[5] || "0";
-    document.getElementById('val5').innerText = userData[6] || "0";
-    document.getElementById('valTotal').innerText = userData[10] || "0";
+document.getElementById("userName").innerText =
+targetName || "ไม่พบชื่อ";
 
-    // ===== เงิน =====
-    const moneyRaw = userData[16]
-        ? userData[16].toString().replace(/,/g,'')
-        : "0";
+const spreadsheetId =
+"1QnXWv7QIh4QdaeNcMR6sybUMt9Sd3vzmU6Id6Fz8UiQ";
 
-    const money = Number(moneyRaw);
-
-    document.getElementById('valMoney').innerText =
-        money.toLocaleString('th-TH') + " ";
+const PAID_API ="https://script.google.com/macros/s/AKfycbz0fuixafpKKqoOUHKQUKdeH99PSZ7-dTCAFiF2n7K6tA9GjImP2MgoAqOPFLUqYPPugw/exec";
 
 
-    // ===== สถานะจ่ายเงิน (Column R) =====
-    const paidCell = (userData[17] || "").toString().toLowerCase();
-    const statusEl = document.getElementById('valPaidStatus');
 
-    if (paidCell === "true") {
-        statusEl.innerText = "✅ จ่ายแล้ว";
-        statusEl.className = "text-3xl font-black text-green-400";
-    } else {
-        statusEl.innerText = "❌ ยังไม่จ่าย";
-        statusEl.className = "text-3xl font-black text-red-400";
-    }
+const baseCsv =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTufyS20gYs7kwAw7NhumKGtOjh3pIYM0eRvL7xYJnpfkfrRs1hcw5QKDeCzrLwkz78k6w0FSzAK5_S/pub?output=csv";
 
-} else {
+let weekList = [];
+let currentWeek = "";
 
-    ["val1","val2","val3","val4","val5","valTotal","valMoney"]
-        .forEach(id => {
-            document.getElementById(id).innerText = "0";
-        });
 
-    document.getElementById('valPaidStatus').innerText = "-";
+
+
+
+/* =========================
+   โหลดข้อมูลหลักครั้งเดียว
+=========================*/
+Papa.parse(baseCsv,{
+download:true,
+complete:(res)=>{
+
+const rows = res.data.slice(3);
+
+const user = rows.find(r =>
+(r[4]||"").trim() === targetName
+);
+
+if(user){
+userRank.innerText = user[5] || "-";
+totalLifetime.innerText = user[6] || "0";
 }
-        },
-            error: function(err) {
-                alert("เข้าถึงข้อมูลไม่ได้! ตรวจสอบการ Share 'Anyone with the link'");
-            }
-        });
-    }
 
-    async function checkUnpaidMonths() {
+weekList = rows.map(r=>r[8]).filter(Boolean);
 
-    Papa.parse(baseCsvUrl, {
-        download: true,
-        complete: async function(results) {
+createWeekButtons();
+checkUnpaid();
+}
+});
 
-            const rows = results.data;
-            const weeks = rows.slice(3)
-                .map(r => r[8])
-                .filter(Boolean);
 
-            let unpaidList = [];
+/* =========================
+   ปุ่มเลือกสัปดาห์
+=========================*/
+function createWeekButtons(){
+const box=document.getElementById("weekSelector");
+box.innerHTML="";
 
-            for (const sheetName of weeks) {
+weekList.forEach(week=>{
+const btn=document.createElement("button");
+btn.className="btn-week";
+btn.innerText=week;
 
-                const url =
-                `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+btn.onclick=()=>{
+document
+.querySelectorAll(".btn-week")
+.forEach(b=>b.classList.remove("active"));
 
-                await new Promise(resolve => {
+btn.classList.add("active");
+loadWeek(week);
+};
 
-                    Papa.parse(url, {
-                        download: true,
-                        complete: function(res) {
+box.appendChild(btn);
+});
+}
 
-                            const userRow = res.data.find(r =>
-                                r[0] &&
-                                r[0].toLowerCase()
-                                .includes(targetName.toLowerCase())
-                            );
 
-                            if (userRow) {
+/* =========================
+   โหลดข้อมูลรายสัปดาห์
+=========================*/
+function loadWeek(sheet){
 
-                                const paid =
-                                    (userRow[17] || "")
-                                    .toString()
-                                    .toLowerCase();
+currentWeek = sheet;
+    
+const url=
+`https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}`;
 
-                                // ❌ ยังไม่รับเงิน
-                                if (paid !== "true") {
-                                    unpaidList.push(sheetName);
-                                }
-                            }
+Papa.parse(url,{
+download:true,
+complete:(res)=>{
 
-                            resolve();
-                        }
-                    });
-                });
-            }
+const row=res.data.find(r=>
+(r[0]||"")
+.toLowerCase()
+.includes(targetName.toLowerCase())
+);
 
-            const box = document.getElementById('unpaidMonths');
+if(!row) return;
 
-            if (unpaidList.length === 0) {
-                box.className =
-                    "mt-3 text-1xl text-green-400 font-semibold";
-                box.innerText = "✅ รับเงินครบทุกสัปดาห์แล้ว";
-            } else {
-                box.className =
-                    "mt-3 text-2xl text-red-400 font-semibold";
-                const html = unpaidList
-                .map(w => `<span class="week-badge">${w}</span>`)
-                .join("");
+val1.innerText=row[2]||0;
+val2.innerText=row[3]||0;
+val3.innerText=row[4]||0;
+val4.innerText=row[5]||0;
+val5.innerText=row[6]||0;
+valTotal.innerText=row[10]||0;
 
-                box.innerHTML =
-                "⚠ ยังไม่ได้รับเงิน:<br>" + html;
-            }
-        }
+const money=Number(
+(row[16]||"0").replace(/,/g,"")
+);
+
+valMoney.innerText=
+money.toLocaleString("th-TH");
+
+if((row[17]||"").toLowerCase()==="true"){
+valPaidStatus.innerText="✅ จ่ายแล้ว";
+valPaidStatus.className="text-green-400";
+}else{
+valPaidStatus.innerText="❌ ยังไม่จ่าย";
+valPaidStatus.className="text-red-400";
+}
+}
+});
+}
+
+
+/* =========================
+   ตรวจเงินค้าง (เร็วขึ้น)
+=========================*/
+async function checkUnpaid(){
+
+let unpaid=[];
+
+for(const week of weekList){
+
+const url=
+`https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(week)}`;
+
+await new Promise(done=>{
+Papa.parse(url,{
+download:true,
+complete:(res)=>{
+
+const row=res.data.find(r=>
+(r[0]||"")
+.toLowerCase()
+.includes(targetName.toLowerCase())
+);
+
+if(row && (row[17]||"").toLowerCase()!=="true"){
+unpaid.push(week);
+}
+
+done();
+}
+});
+});
+}
+
+const box=document.getElementById("unpaidMonths");
+
+if(unpaid.length===0){
+box.className="text-green-400 font-bold";
+box.innerText="✅ รับเงินครบแล้ว";
+}else{
+box.innerHTML=
+"⚠ ยังไม่ได้รับเงิน<br>"+
+unpaid.map(w=>`<span class="week-badge">${w}</span>`).join("");
+}
+}
+
+document.getElementById("paidBtn").onclick = async () => {
+
+  if(!currentWeek){
+    alert("กรุณาเลือกสัปดาห์ก่อน");
+    return;
+  }
+
+  const pin = prompt("กรุณาใส่ PIN");
+
+  if(!pin) return;
+
+  const btn = document.getElementById("paidBtn");
+  btn.innerText = "กำลังบันทึก...";
+  btn.disabled = true;
+
+  try{
+
+    const res = await fetch(PAID_API,{
+      method:"POST",
+      body: JSON.stringify({
+        name: targetName,
+        week: currentWeek,
+        pin: pin
+      })
     });
-}
 
-    checkUnpaidMonths();
-    initWeekSelector();
-    loadGeneralInfo(); // เรียกใช้ข้อมูลหน้าหลัก
+    const data = await res.json();
+
+    if(data.success){
+      valPaidStatus.innerText="✅ จ่ายแล้ว";
+      valPaidStatus.className="text-green-400";
+      alert("บันทึกสำเร็จ");
+    }else{
+      alert(data.message || "ไม่สำเร็จ");
+    }
+
+  }catch(e){
+    alert("เชื่อมต่อ Apps Script ไม่ได้");
+  }
+
+  btn.innerText="✅ จ่ายแล้ว";
+  btn.disabled=false;
+};
+
 </script>
-
-
 
 </body>
 </html>
-
