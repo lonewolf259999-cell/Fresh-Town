@@ -90,7 +90,7 @@ class="text-2xl md:text-4xl font-extrabold uppercase">
 </div>
 
 <div id="unpaidMonths"
-class="mt-3 text-red-400 font-semibold">
+class="mt-5 text-red-400 font-semibold">
 กำลังตรวจสอบเงินเดือน...
 </div>
 </div>
@@ -201,6 +201,11 @@ loadWeek(week);
 
 box.appendChild(btn);
 });
+// สั่งให้คลิกปุ่มสุดท้าย (สัปดาห์ล่าสุด) โดยอัตโนมัติ
+    if (weekList.length > 0) {
+        const buttons = box.querySelectorAll(".btn-week");
+        buttons[buttons.length - 1].click(); 
+    }
 }
 
 
@@ -288,12 +293,15 @@ done();
 const box=document.getElementById("unpaidMonths");
 
 if(unpaid.length===0){
-box.className="text-green-400 font-bold";
-box.innerText="✅ รับเงินครบแล้ว";
+    // เพิ่ม mt-8 หรือ mt-10 เข้าไปเพื่อให้มันเว้นระยะจากด้านบนครับ
+    box.className="mt-5 text-green-400 font-bold"; 
+    box.innerText="✅ รับเงินครบแล้ว";
 }else{
-box.innerHTML=
-"⚠ ยังไม่ได้รับเงิน<br>"+
-unpaid.map(w=>`<span class="week-badge">${w}</span>`).join("");
+    // สำหรับกรณีที่ยังไม่ได้รับเงิน ก็ควรใส่ mt-8 ไว้ด้วยเพื่อให้ตำแหน่งเท่ากัน
+    box.className="mt-8 text-red-400 font-semibold";
+    box.innerHTML=
+    "⚠ ยังไม่ได้รับเงิน<br>"+
+    unpaid.map(w=>`<span class="week-badge">${w}</span>`).join("");
 }
 }
 
@@ -345,4 +353,3 @@ document.getElementById("paidBtn").onclick = async () => {
 
 </body>
 </html>
-
