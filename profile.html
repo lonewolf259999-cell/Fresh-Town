@@ -10,12 +10,8 @@
 
 <style>
 @media (max-width:640px){
-  .stat-card{
-    padding:14px;
-  }
-  .stat-card h2{
-    font-size:20px;
-  }
+  .stat-card{ padding:14px; }
+  .stat-card h2{ font-size:20px; }
 }
     
 body{
@@ -42,6 +38,8 @@ body{
     padding:8px 16px;
     border-radius:8px;
     cursor:pointer;
+    white-space:nowrap; 
+    font-size:15px; 
 }
 
 .btn-week.active{
@@ -58,12 +56,6 @@ body{
     border:1px solid #22c55e55;
     color:#22c55e;
 }
-
-.btn-week{ 
-    white-space:nowrap; 
-    font-size:15px; 
-    padding:6px 14px; 
-}
 </style>
 </head>
 
@@ -76,30 +68,34 @@ body{
 </a>
 
 <div class="text-center mb-10">
-<h1 id="userName"
-class="text-2xl md:text-4xl font-extrabold uppercase">
-กำลังโหลด...
-</h1>
+<h1 id="userName" class="text-2xl md:text-4xl font-extrabold uppercase">กำลังโหลด...</h1>
 
-<div class="text-sm md:text-xl mt-3 flex flex-col md:block gap-2">
-ยศ :
-<span id="userRank" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-2xl font-bold uppercase">...</span>
-|
-รวมเคส :
-<span id="totalLifetime" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-2xl font-bold uppercase">0</span>
+<div class="text-sm md:text-xl mt-3 flex flex-col items-center gap-2">
+    <div>
+        ยศ : <span id="userRank" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-2xl font-bold uppercase">...</span>
+        | รวมเคส : <span id="totalLifetime" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-2xl font-bold uppercase">0</span>
+    </div>
+
+    <div class="mt-4 p-1 bg-yellow-500/10 border border-yellow-500/30 rounded-xl w-48 shadow-lg">
+        <p class="text-gray-400 text-xs uppercase tracking-widest">💰 รายได้สะสมทั้งหมด</p>
+        <h2 id="totalAccumulatedMoney" class="text-1xl font-black text-yellow-400">฿0</h2>
+    </div>
 </div>
 
-<div id="unpaidMonths"
-class="mt-5 text-red-400 font-semibold">
-กำลังตรวจสอบเงินเดือน...
-</div>
+<div id="unpaidMonths" class="mt-8 text-red-400 font-semibold text-center">
+    กำลังตรวจสอบเงินเดือน...
 </div>
 
-<div id="weekSelector"
-class="flex flex-wrap gap-2 mb-6 justify-center"></div>
+<div class="text-center">
+    <button id="payAllBtn" 
+            class="hidden mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold shadow-lg transition-all active:scale-95 text-sm">
+        💳 จ่ายยอดค้างทั้งหมด
+    </button>
+</div>
+
+<div id="weekSelector" class="flex flex-wrap gap-2 my-6 justify-center"></div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 ">
-
 <div class="stat-card"><p>เทค 2</p><h2 id="val1">0</h2></div>
 <div class="stat-card"><p>คดีปกติ</p><h2 id="val2">0</h2></div>
 <div class="stat-card"><p>ทำคดี</p><h2 id="val3">0</h2></div>
@@ -118,240 +114,218 @@ class="flex flex-wrap gap-2 mb-6 justify-center"></div>
 
 <div class="stat-card bg-blue-500/5 border-blue-400/40">
 <p>สถานะ</p>
-<h2 id="valPaidStatus">ตรวจสอบ...</h2>
-<button id="paidBtn"
-class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-bold">
+<h2 id="valPaidStatus" class="text-2xl font-bold">ตรวจสอบ...</h2>
+<button id="paidBtn" class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-bold w-full transition">
 ✅ จ่ายแล้ว
 </button>
 </div>
-
 </div>
 </div>
 
 <script>
 const params = new URLSearchParams(location.search);
 const targetName = (params.get("name")||"").trim();
+document.getElementById("userName").innerText = targetName || "ไม่พบชื่อ";
 
-document.getElementById("userName").innerText =
-targetName || "ไม่พบชื่อ";
-
-const spreadsheetId =
-"1QnXWv7QIh4QdaeNcMR6sybUMt9Sd3vzmU6Id6Fz8UiQ";
-
+const spreadsheetId = "1QnXWv7QIh4QdaeNcMR6sybUMt9Sd3vzmU6Id6Fz8UiQ";
 const PAID_API ="https://script.google.com/macros/s/AKfycby-Yv4EBdX5J2yy-dZR4X4BIPqPf47jazJmtd-O5-4yW2FVGXbIacWzy1dCPdhMHKrPBA/exec";
-
-
-
-const baseCsv =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vTufyS20gYs7kwAw7NhumKGtOjh3pIYM0eRvL7xYJnpfkfrRs1hcw5QKDeCzrLwkz78k6w0FSzAK5_S/pub?output=csv";
+const baseCsv = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTufyS20gYs7kwAw7NhumKGtOjh3pIYM0eRvL7xYJnpfkfrRs1hcw5QKDeCzrLwkz78k6w0FSzAK5_S/pub?output=csv";
 
 let weekList = [];
 let currentWeek = "";
+let unpaidWeeksList = [];
 
-
-
-
-
-/* =========================
-   โหลดข้อมูลหลักครั้งเดียว
-=========================*/
 Papa.parse(baseCsv,{
 download:true,
 complete:(res)=>{
-
-const rows = res.data.slice(3);
-
-const user = rows.find(r =>
-(r[4]||"").trim() === targetName
-);
-
-if(user){
-userRank.innerText = user[5] || "-";
-totalLifetime.innerText = user[6] || "0";
-}
-
-weekList = rows.map(r=>r[8]).filter(Boolean);
-
-createWeekButtons();
-checkUnpaid();
+    const rows = res.data.slice(3);
+    const user = rows.find(r => (r[4]||"").trim() === targetName);
+    if(user){
+        document.getElementById("userRank").innerText = user[5] || "-";
+        document.getElementById("totalLifetime").innerText = user[6] || "0";
+    }
+    weekList = rows.map(r=>r[8]).filter(Boolean);
+    createWeekButtons();
+    checkUnpaid();
 }
 });
 
-
-/* =========================
-   ปุ่มเลือกสัปดาห์
-=========================*/
 function createWeekButtons(){
-const box=document.getElementById("weekSelector");
-box.innerHTML="";
-
-weekList.forEach(week=>{
-const btn=document.createElement("button");
-btn.className="btn-week";
-btn.innerText=week;
-
-btn.onclick=()=>{
-document
-.querySelectorAll(".btn-week")
-.forEach(b=>b.classList.remove("active"));
-
-btn.classList.add("active");
-loadWeek(week);
-};
-
-box.appendChild(btn);
-});
-// สั่งให้คลิกปุ่มสุดท้าย (สัปดาห์ล่าสุด) โดยอัตโนมัติ
+    const box=document.getElementById("weekSelector");
+    box.innerHTML="";
+    weekList.forEach(week=>{
+        const btn=document.createElement("button");
+        btn.className="btn-week";
+        btn.innerText=week;
+        btn.onclick=()=>{
+            document.querySelectorAll(".btn-week").forEach(b=>b.classList.remove("active"));
+            btn.classList.add("active");
+            loadWeek(week);
+        };
+        box.appendChild(btn);
+    });
     if (weekList.length > 0) {
         const buttons = box.querySelectorAll(".btn-week");
         buttons[buttons.length - 1].click(); 
     }
 }
 
-
-/* =========================
-   โหลดข้อมูลรายสัปดาห์
-=========================*/
 function loadWeek(sheet){
+    currentWeek = sheet;
+    const url=`https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}`;
+    Papa.parse(url,{
+        download:true,
+        complete:(res)=>{
+            const row=res.data.find(r=>(r[0]||"").toLowerCase().includes(targetName.toLowerCase()));
+            if(!row) return;
+            document.getElementById("val1").innerText=row[2]||0;
+            document.getElementById("val2").innerText=row[3]||0;
+            document.getElementById("val3").innerText=row[4]||0;
+            document.getElementById("val4").innerText=row[5]||0;
+            document.getElementById("val5").innerText=row[6]||0;
+            document.getElementById("valTotal").innerText=row[10]||0;
+            const money=Number((row[16]||"0").replace(/,/g,""));
+            document.getElementById("valMoney").innerText=money.toLocaleString("th-TH");
 
-currentWeek = sheet;
-    
-const url=
-`https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}`;
-
-Papa.parse(url,{
-download:true,
-complete:(res)=>{
-
-const row=res.data.find(r=>
-(r[0]||"")
-.toLowerCase()
-.includes(targetName.toLowerCase())
-);
-
-if(!row) return;
-
-val1.innerText=row[2]||0;
-val2.innerText=row[3]||0;
-val3.innerText=row[4]||0;
-val4.innerText=row[5]||0;
-val5.innerText=row[6]||0;
-valTotal.innerText=row[10]||0;
-
-const money=Number(
-(row[16]||"0").replace(/,/g,"")
-);
-
-valMoney.innerText=
-money.toLocaleString("th-TH");
-
-if((row[17]||"").toLowerCase()==="true"){
-valPaidStatus.innerText="✅ จ่ายแล้ว";
-valPaidStatus.className="text-green-400";
-}else{
-valPaidStatus.innerText="❌ ยังไม่จ่าย";
-valPaidStatus.className="text-red-400";
-}
-}
-});
-}
-
-
-/* =========================
-   ตรวจเงินค้าง (เร็วขึ้น)
-=========================*/
-async function checkUnpaid(){
-
-let unpaid=[];
-
-for(const week of weekList){
-
-const url=
-`https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(week)}`;
-
-await new Promise(done=>{
-Papa.parse(url,{
-download:true,
-complete:(res)=>{
-
-const row=res.data.find(r=>
-(r[0]||"")
-.toLowerCase()
-.includes(targetName.toLowerCase())
-);
-
-if(row && (row[17]||"").toLowerCase()!=="true"){
-unpaid.push(week);
-}
-
-done();
-}
-});
-});
-}
-
-const box=document.getElementById("unpaidMonths");
-
-if(unpaid.length===0){
-    // เพิ่ม mt-8 หรือ mt-10 เข้าไปเพื่อให้มันเว้นระยะจากด้านบนครับ
-    box.className="mt-5 text-green-400 font-bold"; 
-    box.innerText="✅ รับเงินครบแล้ว";
-}else{
-    // สำหรับกรณีที่ยังไม่ได้รับเงิน ก็ควรใส่ mt-8 ไว้ด้วยเพื่อให้ตำแหน่งเท่ากัน
-    box.className="mt-8 text-red-400 font-semibold";
-    box.innerHTML=
-    "⚠ ยังไม่ได้รับเงิน<br>"+
-    unpaid.map(w=>`<span class="week-badge">${w}</span>`).join("");
-}
-}
-
-document.getElementById("paidBtn").onclick = async () => {
-
-  if(!currentWeek){
-    alert("กรุณาเลือกสัปดาห์ก่อน");
-    return;
-  }
-
-  const pin = prompt("กรุณาใส่ PIN");
-
-  if(!pin) return;
-
-  const btn = document.getElementById("paidBtn");
-  btn.innerText = "กำลังบันทึก...";
-  btn.disabled = true;
-
-  try{
-
-    const res = await fetch(PAID_API,{
-      method:"POST",
-      body: JSON.stringify({
-        name: targetName,
-        week: currentWeek,
-        pin: pin
-      })
+            if((row[17]||"").toLowerCase()==="true"){
+                document.getElementById("valPaidStatus").innerText="✅ จ่ายแล้ว";
+                document.getElementById("valPaidStatus").className="text-green-400 text-2xl font-bold";
+            }else{
+                document.getElementById("valPaidStatus").innerText="❌ ยังไม่จ่าย";
+                document.getElementById("valPaidStatus").className="text-red-400 text-2xl font-bold";
+            }
+        }
     });
+}
 
-    const data = await res.json();
+async function checkUnpaid(){
+    let unpaid=[];
+    let totalAllWeeks = 0;
+    let totalUnpaid = 0;
 
-    if(data.success){
-      valPaidStatus.innerText="✅ จ่ายแล้ว";
-      valPaidStatus.className="text-green-400";
-      alert("บันทึกสำเร็จ");
-      location.reload();
-    }else{
-      alert(data.message || "ไม่สำเร็จ");
+    for(const week of weekList){
+        const url=`https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(week)}`;
+        await new Promise(done=>{
+            Papa.parse(url,{
+                download:true,
+                complete:(res)=>{
+                    const row=res.data.find(r=>(r[0]||"").toLowerCase().includes(targetName.toLowerCase()));
+                    if(row){
+                        const weekMoney = Number((row[16]||"0").replace(/,/g,""));
+                        totalAllWeeks += weekMoney;
+                        if((row[17]||"").toLowerCase()!=="true"){
+                            unpaid.push(week);
+                            totalUnpaid += weekMoney;
+                        }
+                    }
+                    done();
+                }
+            });
+        });
     }
 
-  }catch(e){
-    alert("เชื่อมต่อ Apps Script ไม่ได้");
-  }
+    unpaidWeeksList = unpaid;
+    const payBtn = document.getElementById("payAllBtn");
+    if (unpaid.length > 0) {
+        payBtn.classList.remove("hidden");
+    } else {
+        payBtn.classList.add("hidden");
+    }
 
-  btn.innerText="✅ จ่ายแล้ว";
-  btn.disabled=false;
+    document.getElementById("totalAccumulatedMoney").innerText = `฿${totalAllWeeks.toLocaleString("th-TH")}`;
+    const box=document.getElementById("unpaidMonths");
+
+    if(unpaid.length===0){
+        box.className="mt-5 text-green-400 font-bold text-lg text-center"; 
+        box.innerText="✅ รับเงินครบทุกงวดแล้ว";
+    }else{
+        box.className="mt-8 text-red-400 font-semibold text-center";
+        box.innerHTML = `
+            <div class="mb-2 text-xl">
+                ⚠ ยังไม่ได้รับเงินรวม : 
+                <span class="text-cyan-400 underline font-bold cursor-pointer hover:text-sky-400 active:text-green-400 transition" 
+                      title="คลิกเพื่อคัดลอก"
+                      onclick="copyToClipboard('${totalUnpaid}')">
+                    ${totalUnpaid}
+                </span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-1">
+                ${unpaid.map(w => `<span class="week-badge">${w}</span>`).join("")}
+            </div>
+        `;
+    }
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        // คัดลอกแล้ว
+    });
+}
+
+document.getElementById("payAllBtn").onclick = async () => {
+    const pin = prompt("กรุณาใส่ PIN ยืนยันการจ่ายยอดค้างทั้งหมด");
+    if (!pin) return;
+
+    const btn = document.getElementById("payAllBtn");
+    const originalText = btn.innerText;
+    btn.innerText = "กำลังบันทึกข้อมูลทุกชีต...";
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(PAID_API, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "PAY_ALL",
+                name: targetName,
+                weeks: unpaidWeeksList,
+                pin: pin
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert("✅ บันทึกจ่ายเงินครบทุกอาทิตย์แล้ว!");
+            location.reload();
+        } else {
+            alert(data.message || "❌ เกิดข้อผิดพลาด");
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    } catch (e) {
+        alert("⚠️ เชื่อมต่อระบบไม่ได้");
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
 };
 
-</script>
+document.getElementById("paidBtn").onclick = async () => {
+    if(!currentWeek){ alert("กรุณาเลือกสัปดาห์ก่อน"); return; }
+    const pin = prompt("กรุณาใส่ PIN");
+    if(!pin) return;
 
+    const btn = document.getElementById("paidBtn");
+    btn.innerText = "กำลังบันทึก...";
+    btn.disabled = true;
+
+    try{
+        const res = await fetch(PAID_API,{
+            method:"POST",
+            body: JSON.stringify({ name: targetName, week: currentWeek, pin: pin })
+        });
+        const data = await res.json();
+        if(data.success){
+            alert("บันทึกสำเร็จ");
+            location.reload();
+        }else{
+            alert(data.message || "ไม่สำเร็จ");
+            btn.innerText="✅ จ่ายแล้ว";
+            btn.disabled=false;
+        }
+    }catch(e){
+        alert("เชื่อมต่อ Apps Script ไม่ได้");
+        btn.innerText="✅ จ่ายแล้ว";
+        btn.disabled=false;
+    }
+};
+</script>
 </body>
 </html>
-
