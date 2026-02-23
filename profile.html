@@ -337,6 +337,7 @@ document.getElementById("paidBtn").onclick = async () => {
       valPaidStatus.innerText="✅ จ่ายแล้ว";
       valPaidStatus.className="text-green-400";
       alert("บันทึกสำเร็จ");
+      location.reload();
     }else{
       alert(data.message || "ไม่สำเร็จ");
     }
@@ -353,3 +354,4 @@ document.getElementById("paidBtn").onclick = async () => {
 
 </body>
 </html>
+
