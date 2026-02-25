@@ -7,13 +7,32 @@
 <title>Fresh Town Police</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-
 <link rel="preconnect" href="https://docs.google.com">
 <link rel="dns-prefetch" href="https://docs.google.com">
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
+
+*{
+  box-sizing:border-box;
+}
+
+.top-card{
+    background:rgba(59,130,246,.08);
+    border:1px solid rgba(59,130,246,.35);
+    border-radius:12px;
+    padding:14px;
+    transition:.2s;
+}
+.top-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 6px 18px rgba(59,130,246,.25);
+}
+.top-rank{
+    font-size:22px;
+    font-weight:800;
+    color:#3b82f6;
+}
 body{
     font-family:'Inter',sans-serif;
     background:#0d1117;
@@ -23,22 +42,20 @@ body{
     backdrop-filter:blur(10px);
 }
 .neon-border{
-    border-bottom:2px solid #2ecc71;
-    box-shadow:0 4px 15px rgba(46,204,113,.2);
+    border-bottom:2px solid #3b82f6;
+    box-shadow:0 4px 15px rgba(59,130,246,.2);
 }
 .loading{
     border-radius:50%;
     width:24px;
     height:24px;
     border:3px solid rgba(255,255,255,.1);
-    border-top-color:#2ecc71;
+    border-top-color:#3b82f6;
     animation:spin 1s linear infinite;
 }
-table{
-    border-collapse:collapse;
-}
-tr{transition:.15s ease}
-@keyframes spin{to{transform:rotate(360deg)}}
+table{ border-collapse:collapse; }
+tr{ transition:.15s ease }
+@keyframes spin{ to{ transform:rotate(360deg)} }
 </style>
 </head>
 
@@ -46,16 +63,28 @@ tr{transition:.15s ease}
 
 <div class="max-w-5xl mx-auto">
 
-<!-- HEADER -->
 <div class="text-center mb-10">
-<h1 class="text-xl md:text-3xl font-extrabold text-white uppercase">
+<h1 class="text-xl md:text-4xl font-extrabold uppercase
+text-slate-100 
+drop-shadow-[0_0_18px_rgba(59,130,246,0.9)]
+tracking-widest">
 Fresh Town Police
 </h1>
+</div>
 
-<div class="relative max-w-md mx-auto mt-6">
+<!-- TOP CASE ล่าสุด -->
+<div id="topCaseBox"
+class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+</div>
+
+<div class="relative w-full max-w-md mx-auto mt-6 px-2">
 <input id="searchInput"
 placeholder="พิมพ์ชื่อหรือยศเพื่อค้นหา..."
-class="w-full bg-[#161b22] border-2 border-green-500/30 rounded-full py-2 md:py-3 px-4 md:px-12 text-sm md:text-base">
+class="w-full bg-[#161b22] border-2 border-blue-500/30 
+rounded-full py-2 md:py-3 px-5 
+text-sm md:text-base 
+focus:outline-none focus:ring-2 focus:ring-blue-500
+transition">
 
 <div id="loader" class="absolute right-4 top-3.5 hidden">
 <div class="loading"></div>
@@ -63,20 +92,16 @@ class="w-full bg-[#161b22] border-2 border-green-500/30 rounded-full py-2 md:py-
 </div>
 </div>
 
-<!-- TABLE -->
-<div class="glass-card rounded-xl overflow-hidden shadow-2xl">
+<div class="glass-card rounded-xl overflow-hidden shadow-2xl mt-7">
 <table class="w-full table-fixed">
-
-<thead class="text-green-500 uppercase text-sm font-bold neon-border">
+<thead class="text-blue-500 uppercase text-sm font-bold neon-border">
 <tr>
 <th class="px-6 py-3 text-left w-[55%]">👤 NAME</th>
 <th class="px-6 py-3 text-left w-[25%]">🎖️ RANK</th>
 <th class="px-6 py-3 text-right w-[20%]">📂 CASE</th>
 </tr>
 </thead>
-
 <tbody id="tableBody" class="divide-y divide-gray-800"></tbody>
-
 </table>
 </div>
 </div>
@@ -88,95 +113,82 @@ class="w-full bg-[#161b22] border-2 border-green-500/30 rounded-full py-2 md:py-
 const csvUrl =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vTufyS20gYs7kwAw7NhumKGtOjh3pIYM0eRvL7xYJnpfkfrRs1hcw5QKDeCzrLwkz78k6w0FSzAK5_S/pub?output=csv";
 
-const CACHE_KEY="FTPD_CACHE_V3";
-const CACHE_TIME=60000;
+const spreadsheetId = "1QnXWv7QIh4QdaeNcMR6sybUMt9Sd3vzmU6Id6Fz8UiQ";
 
 let allData=[];
 const tableBody=document.getElementById("tableBody");
 
-/* ================= ERROR GUARD ================= */
-window.addEventListener("error",e=>{
-console.error("APP ERROR:",e.message);
-});
-
 /* ================= FETCH DATA ================= */
-async function fetchData(){
+function fetchData(){
+    document.getElementById("loader").classList.remove("hidden");
 
-const loader=document.getElementById("loader");
-const cacheRaw=localStorage.getItem(CACHE_KEY);
+    Papa.parse(csvUrl,{
+        download:true,
+        complete:(results)=>{
 
-/* USE CACHE */
-if(cacheRaw){
-const cache=JSON.parse(cacheRaw);
+            const rows = results.data.slice(3);
 
-allData=cache.data;
-renderTable(allData);
+            allData = rows.map(r=>({
+                name:(r[4]||"").trim(),
+                rank:(r[5]||"").trim(),
+                case:(r[6]||"0").trim()
+            }))
+            .filter(x=>x.name);
 
-if(Date.now()-cache.time<CACHE_TIME) return;
+            renderTable(allData);
+            renderLatestWeekTop(rows);
 
-refreshBackground();
-return;
+            document.getElementById("loader").classList.add("hidden");
+        }
+    });
 }
 
-/* FIRST LOAD */
-loader.classList.remove("hidden");
+/* ================= TOP WEEK ล่าสุด ================= */
+function renderLatestWeekTop(rows){
 
-Papa.parse(csvUrl,{
-download:true,
-complete:(results)=>{
+    const weekList = rows.map(r=>r[8]).filter(Boolean);
+    if(!weekList.length) return;
 
-allData=results.data.slice(3)
-.map(r=>({
-name:(r[4]||"").trim(),
-rank:(r[5]||"").trim(),
-case:(r[6]||"0").trim()
-}))
-.filter(x=>x.name);
+    const latestWeek = weekList[weekList.length-1].trim();
 
-localStorage.setItem(CACHE_KEY,JSON.stringify({
-time:Date.now(),
-data:allData
-}));
+    const url =
+    `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(latestWeek)}`;
 
-renderTable(allData);
-loader.classList.add("hidden");
-},
-error:()=>{
-tableBody.innerHTML=
-`<tr><td colspan="3" class="text-center py-10 text-red-400">
-โหลดข้อมูลไม่สำเร็จ
-</td></tr>`;
-}
-});
-}
+    Papa.parse(url,{
+        download:true,
+        complete:(weekRes)=>{
 
-/* ================= BACKGROUND REFRESH ================= */
-function refreshBackground(){
+            const weekRows = weekRes.data.slice(3);
 
-Papa.parse(csvUrl,{
-download:true,
-complete:(res)=>{
+            const players = weekRows.map(r=>({
+                name:(r[0]||"").trim(),
+                case:Number((r[10]||"0").replace(/,/g,""))
+            }))
+            .filter(p=>p.name && !isNaN(p.case));
 
-const newData=res.data.slice(3)
-.map(r=>({
-name:(r[4]||"").trim(),
-rank:(r[5]||"").trim(),
-case:(r[6]||"0").trim()
-}))
-.filter(x=>x.name);
+            const top3 = players
+            .sort((a,b)=>b.case-a.case)
+            .slice(0,3);
 
-localStorage.setItem(CACHE_KEY,JSON.stringify({
-time:Date.now(),
-data:newData
-}));
-}
-});
+            const box=document.getElementById("topCaseBox");
+
+            box.innerHTML = `
+            <div class="col-span-3 text-center text-sm text-slate-200 drop-shadow-[0_0_6px_rgba(59,130,246,0.4)] mb-2">
+            🗓 อาทิตย์ล่าสุด : ${latestWeek}
+            </div>
+            ` + top3.map((p,i)=>`
+            <div class="top-card">
+                <div class="top-rank">🏆 TOP ${i+1}</div>
+                <div class="font-bold text-blue-400 mt-1">${p.name}</div>
+                <div class="text-xl font-mono mt-2 text-blue-400">${p.case} CASE</div>
+            </div>
+            `).join("");
+        }
+    });
 }
 
-/* ================= RENDER ================= */
+/* ================= RENDER TABLE ================= */
 function renderTable(data){
-
-requestAnimationFrame(()=>{
 
 if(data.length===0){
 tableBody.innerHTML=
@@ -188,46 +200,34 @@ return;
 
 tableBody.innerHTML=data.map(item=>`
 <tr class="hover:bg-white/5 border-b border-gray-800">
-<td class="px-6 py-4 font-semibold text-green-400 truncate">
+<td class="px-6 py-4 font-semibold text-blue-400 truncate">
 <a href="profile.html?name=${encodeURIComponent(item.name)}">
 ${item.name}
 </a>
 </td>
-
 <td class="px-6 py-4 text-left text-gray-400">
 ${item.rank||"-"}
 </td>
-<td class="px-6 py-4 text-right font-mono tabular-nums text-green-400 ">
+<td class="px-6 py-4 text-right font-mono tabular-nums text-blue-400">
 ${item.case||"0"}
 </td>
 </tr>
 `).join("");
-});
 }
 
 /* ================= SEARCH ================= */
 searchInput.addEventListener("input",e=>{
 const term=e.target.value.toLowerCase().trim();
-
 const filtered=allData.filter(item=>
 item.name.toLowerCase().includes(term) ||
 item.rank.toLowerCase().includes(term)
 );
-
 renderTable(filtered);
 });
 
-/* ================= FAIL SAFE ================= */
-setTimeout(()=>{
-if(allData.length===0){
-tableBody.innerHTML=
-`<tr><td colspan="3" class="text-center py-10 text-yellow-400">
-⚠ โหลดข้อมูลช้า กรุณารีเฟรช
-</td></tr>`;
-}
-},8000);
-
+/* ================= START ================= */
 fetchData();
+
 </script>
 </body>
 </html>
