@@ -13,7 +13,25 @@
   .stat-card{ padding:14px; }
   .stat-card h2{ font-size:20px; }
 }
-    
+
+.btn-week{
+    background:#21262d;
+    border:1px solid #30363d;
+    padding:8px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    white-space:nowrap; 
+    font-size:15px;
+    transition:all .2s ease;
+}
+
+.btn-week:hover{
+    border-color:#3b82f6;
+    box-shadow:0 0 12px rgba(59,130,246,.6);
+    transform:translateY(-3px) scale(1.05);
+}
+
+
 body{
     font-family:'Inter',sans-serif;
     background:#0d1117;
@@ -28,7 +46,7 @@ body{
     transition:.25s;
 }
 .stat-card:hover{
-    border-color:#2ecc71;
+    border-color:#3314e0;
     transform:translateY(-4px);
 }
 
@@ -43,7 +61,7 @@ body{
 }
 
 .btn-week.active{
-    background:#238636;
+    background:#3314e0;
 }
 
 .week-badge{
@@ -52,9 +70,9 @@ body{
     margin:4px;
     border-radius:999px;
     font-weight:bold;
-    background:#22c55e20;
-    border:1px solid #22c55e55;
-    color:#22c55e;
+    background:#10d6dd20;
+    border:1px solid #05863555;
+    color:#0374d1;
 }
 </style>
 </head>
@@ -63,17 +81,20 @@ body{
 
 <div class="max-w-4xl mx-auto">
 
-<a href="index.html" class="text-green-400 hover:underline">
+<a href="index.html" class="text-blue-500 hover:underline">
 ← กลับหน้าหลัก
 </a>
 
 <div class="text-center mb-10">
-<h1 id="userName" class="text-2xl md:text-4xl font-extrabold uppercase">กำลังโหลด...</h1>
+<h1 id="userName" 
+    class="text-2xl md:text-4xl font-extrabold uppercase text-blue-600 drop-shadow-[0_0_10px_rgba(59,130,246,0.8)]">
+กำลังโหลด...
+</h1>
 
-<div class="text-sm md:text-xl mt-3 flex flex-col items-center gap-2">
+<div class="text-sm md:text-xl mt-6 flex flex-col items-center gap-2">
     <div>
-        ยศ : <span id="userRank" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-2xl font-bold uppercase">...</span>
-        | รวมเคส : <span id="totalLifetime" class="px-3 py-1 bg-green-500/10 text-green-400 rounded-full border border-green-500/20 text-2xl font-bold uppercase">0</span>
+        ยศ : <span id="userRank" class="px-3 py-1 bg-green-500/10 text-blue-500 rounded-full border border-green-500/20 text-2xl font-bold uppercase">...</span>
+        | รวมเคส : <span id="totalLifetime" class="px-3 py-1 bg-green-500/10 text-blue-500 rounded-full border border-green-500/20 text-2xl font-bold uppercase">0</span>
     </div>
 
     <div class="mt-4 p-1 bg-yellow-500/10 border border-yellow-500/30 rounded-xl w-48 shadow-lg">
@@ -102,7 +123,7 @@ body{
 <div class="stat-card"><p>รถยอด</p><h2 id="val4">0</h2></div>
 <div class="stat-card"><p>คุมสอบ</p><h2 id="val5">0</h2></div>
 
-<div class="stat-card bg-green-500/5 border-green-500/40">
+<div class="stat-card bg-blue-500/10 border-blue-500/40">
 <p>รวมอาทิตย์นี้</p>
 <h2 id="valTotal" class="text-3xl font-bold">0</h2>
 </div>
@@ -115,7 +136,7 @@ body{
 <div class="stat-card bg-blue-500/5 border-blue-400/40">
 <p>สถานะ</p>
 <h2 id="valPaidStatus" class="text-2xl font-bold">ตรวจสอบ...</h2>
-<button id="paidBtn" class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-bold w-full transition">
+<button id="paidBtn" class="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-bold w-full transition">
 ✅ จ่ายแล้ว
 </button>
 </div>
@@ -176,8 +197,24 @@ function loadWeek(sheet){
     Papa.parse(url,{
         download:true,
         complete:(res)=>{
-            const row=res.data.find(r=>(r[0]||"").toLowerCase().includes(targetName.toLowerCase()));
-            if(!row) return;
+            const row = res.data.find(r =>
+    (r[0] || "").toLowerCase().includes(targetName.toLowerCase())
+);
+
+if (!row) {
+    document.getElementById("val1").innerText = 0;
+    document.getElementById("val2").innerText = 0;
+    document.getElementById("val3").innerText = 0;
+    document.getElementById("val4").innerText = 0;
+    document.getElementById("val5").innerText = 0;
+    document.getElementById("valTotal").innerText = 0;
+    document.getElementById("valMoney").innerText = 0;
+
+    document.getElementById("valPaidStatus").innerText = "❌ ไม่พบชื่อในอาทิตย์นี้";
+    document.getElementById("valPaidStatus").className = "text-red-400 text-xl font-bold";
+
+    return;
+}
             document.getElementById("val1").innerText=row[2]||0;
             document.getElementById("val2").innerText=row[3]||0;
             document.getElementById("val3").innerText=row[4]||0;
@@ -236,7 +273,7 @@ async function checkUnpaid(){
     const box=document.getElementById("unpaidMonths");
 
     if(unpaid.length===0){
-        box.className="mt-5 text-green-400 font-bold text-lg text-center"; 
+        box.className="mt-5 text-blue-500 font-bold text-lg text-center"; 
         box.innerText="✅ รับเงินครบทุกงวดแล้ว";
     }else{
         box.className="mt-8 text-red-400 font-semibold text-center";
